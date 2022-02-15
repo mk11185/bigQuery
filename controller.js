@@ -85,16 +85,40 @@ module.exports = {
     },
     loadLocalCsv: async (req, res, next) => {
         let filename = req.file.path
-        try{
-        const {datasetId,tableId} = req.body
-        const [job] = await bigquery
-            .dataset(datasetId)
-            .table(tableId)
-            .load(filename);
-        return res.status(200).send({success: true, message : `Job ${job.id} completed.`});
+        try {
+            const { datasetId, tableId } = req.body
+            const [job] = await bigquery
+                .dataset(datasetId)
+                .table(tableId)
+                .load(filename);
+            return res.status(200).send({ success: true, message: `Job ${job.id} completed.` });
         }
-        catch(error){
-            res.status(500).send({status:false,error:error.message})
+        catch (error) {
+            res.status(500).send({ status: false, error: error.message })
+        }
+    },
+    uploadDataToBigquery: async (req, res) => {
+        try {
+            
+            // let { table_name,
+            //     changed_by,
+            //     lead_activity_log_id,
+            //     field_name,
+            //     new_value,
+            //     old_value,
+            //     DOC,
+            //     lead_id } = req.body
+            let data = []
+            data.push(req.body)
+                await bigquery
+                .dataset(config.dataset)
+                .table(config.table)
+                .insert(data);
+
+            return res.status(200).send({success:true,data})
+        }
+        catch (error) {
+            return res.status(500).send({ status: 500, error: error.message })
         }
     }
 }
